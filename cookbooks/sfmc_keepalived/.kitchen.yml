@@ -1,0 +1,40 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_zero
+  # You may wish to disable always updating cookbooks in CI or other testing environments.
+  # For example:
+  #   always_update_cookbooks: <%= !ENV['CI'] %>
+  always_update_cookbooks: true
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: centos-7.3
+
+suites:
+  - name: default
+    run_list:
+      - recipe[sfmc_keepalived::default]
+    verifier:
+      inspec_tests:
+        - test/smoke/default
+    attributes:
+      keepalived:
+        hosts:
+          default-centos-73: 'nginx'
+          lb1: 'nginx'
+          lb2: 'nginx'
+        services:
+          nginx:
+            virtual_router_id: 1
+            priority: 50
+            virtual_ipaddress:
+              - '10.0.0.100'
+            peers:
+              default-centos-73: '10.0.0.4'
+              lb1: '10.0.0.4'
+              lb2: '10.0.0.5'
